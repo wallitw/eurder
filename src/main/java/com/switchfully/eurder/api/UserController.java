@@ -22,7 +22,6 @@ public class UserController {
         //this.securityService = securityService;
     }
 
-
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public CustomerDto createCustomer (@RequestBody CreateCustomerDto createCustomerDto) {
