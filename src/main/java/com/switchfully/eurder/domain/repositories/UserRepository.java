@@ -18,7 +18,7 @@ public class UserRepository {
         this.userMap.put(firstAdmin.getId(), firstAdmin);
     }
 
-    public Customer save(Customer customer) {
+    public Customer createCustomer(Customer customer) {
         userMap.put(customer.getId(), customer);
         return customer;
     }

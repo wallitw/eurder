@@ -41,7 +41,7 @@ public class UserService {
                 createCustomerDto.email(),
                 createCustomerDto.address(),
                 createCustomerDto.phoneNumber());
-        return userMapper.toDTO(userRepository.save(customer));
+        return userMapper.toDTO(userRepository.createCustomer(customer));
     }
 
     public String validateUserInput(CreateUserDto createUserDto) {
