@@ -1,24 +1,22 @@
 package com.switchfully.eurder.domain;
 
-public class Customer {
-    private final String id;
+import com.switchfully.eurder.domain.security.Role;
+
+public class Customer extends User {
+
     private final String firstName;
     private final String lastName;
     private final String email;
     private final Address address;
     private final String phoneNumber;
 
-    public Customer(String id, String firstName, String lastName, String email, Address address, String phoneNumber) {
-        this.id = id;
+    public Customer(String userName, String password, Role role, String firstName, String lastName, String email, Address address, String phoneNumber) {
+        super(userName, password, role);
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.address = address;
         this.phoneNumber = phoneNumber;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getFirstName() {
