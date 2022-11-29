@@ -37,6 +37,17 @@ class ItemControllerTest {
                         .then().statusCode(201).and().extract().as(ItemDto.class);
         assertEquals("Laptop", result.name());
     }
+    @Test
+    void createItem_whenAdminAndEmptyFields_thenMessageContainsInvalidFields() {
+        CreateItemDto createItemDto = new CreateItemDto("", "", -7, -1);
+
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType(ContentType.JSON).body(createItemDto)
+                        .when().post("/items")
+                        .then().statusCode(400).and().extract().as(JSONObject.class);
+        assertEquals("Following fields are invalid: name description price amountInStock", response.get("message").toString());
+    }
 
     @Test
     void createItem_whenAdminAndWrongPassword_thenForbiddenAndMessageUnauthorized() {

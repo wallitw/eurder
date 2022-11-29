@@ -24,7 +24,7 @@ public class ItemService {
 
     public ItemDto createItem(CreateItemDto createItemDto) {
         String error = validateInput(createItemDto);
-        if (!error.isEmpty()) throw new IllegalArgumentException("Following fields are invalid: " + error);
+        if (!error.isEmpty()) throw new IllegalArgumentException("Following fields are invalid:" + error);
         Item item = new Item(createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amountInStock());
         return itemMapper.toDTO(itemRepository.createItem(item));
     }
