@@ -1,5 +1,6 @@
 package com.switchfully.eurder.domain;
 
+import com.switchfully.eurder.domain.security.Feature;
 import com.switchfully.eurder.domain.security.Role;
 
 import java.util.UUID;
@@ -31,5 +32,13 @@ public class User {
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean doesPasswordMatch(String password) {
+        return this.password.equals(password);
+    }
+
+    public boolean hasAccessTo(Feature feature) {
+        return this.role.hasFeature(feature);
     }
 }

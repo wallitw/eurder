@@ -24,7 +24,7 @@ class UserControllerTest {
     private UserRepository userRepository;
 
     @Test
-    void createCustomer_happyPath()  {
+    void createCustomer_happyPath() {
         JSONObject requestBody = new JSONObject();
         requestBody.put("userName", "wally");
         requestBody.put("password", "pwd");
@@ -43,7 +43,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createCustomer_whenEmptyFields_thenMessageContainsEmptyFields()  {
+    void createCustomer_whenEmptyFields_thenMessageContainsEmptyFields() {
         JSONObject requestBody = new JSONObject();
         requestBody.put("userName", "");
         requestBody.put("password", "pwd");
@@ -56,13 +56,14 @@ class UserControllerTest {
         Map<String, String> response =
                 RestAssured.given().port(port).contentType("application/json").body(requestBody)
                         .when().post("/users")
-                        .then().statusCode(400).and().extract().as(new TypeRef<Map<String, String>>(){});
+                        .then().statusCode(400).and().extract().as(new TypeRef<Map<String, String>>() {
+                        });
 
         assertEquals("Following fields are invalid: userName firstName streetName", new JSONObject(response).get("message").toString());
     }
 
     @Test
-    void createCustomer_whenEmailWrongFormat_thenMessageContainsEmail()  {
+    void createCustomer_whenEmailWrongFormat_thenMessageContainsEmail() {
         JSONObject requestBody = new JSONObject();
         requestBody.put("userName", "wally");
         requestBody.put("password", "pwd");
@@ -75,7 +76,8 @@ class UserControllerTest {
         Map<String, String> response =
                 RestAssured.given().port(port).contentType("application/json").body(requestBody)
                         .when().post("/users")
-                        .then().statusCode(400).and().extract().as(new TypeRef<Map<String, String>>(){});
+                        .then().statusCode(400).and().extract().as(new TypeRef<Map<String, String>>() {
+                        });
 
         assertEquals("Following fields are invalid: email", new JSONObject(response).get("message").toString());
     }

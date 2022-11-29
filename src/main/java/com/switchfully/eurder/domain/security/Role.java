@@ -4,7 +4,7 @@ package com.switchfully.eurder.domain.security;
 import java.util.List;
 
 public enum Role {
-    CUSTOMER, ADMIN;
+    CUSTOMER, ADMIN(Feature.CREATE_ITEM);
 
     private final List<Feature> features;
 
