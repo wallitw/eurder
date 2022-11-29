@@ -30,9 +30,8 @@ public class UserService {
         error += validateCustomerInput(createCustomerDto);
         if (!error.isEmpty()) {
             logger.info("A user tried to create an account but entered invalid fields: " + error);
-            throw new IllegalArgumentException("Following fields are invalid: " + error);
+            throw new IllegalArgumentException("Following fields are invalid:" + error);
         }
-
 
         Customer customer = new Customer(createCustomerDto.userName(),
                 createCustomerDto.password(),
@@ -48,10 +47,10 @@ public class UserService {
     public String validateUserInput(CreateUserDto createUserDto) {
         String result = "";
         if (createUserDto.userName().isEmpty()) {
-            result += " name ";
+            result += " userName";
         }
         if (createUserDto.password().isEmpty()) {
-            result += " password ";
+            result += " password";
         }
         return result;
     }
@@ -59,25 +58,25 @@ public class UserService {
     public String validateCustomerInput(CreateCustomerDto createCustomerDto) {
         String result = "";
         if (createCustomerDto.firstName().isEmpty()) {
-            result += " firstName ";
+            result += " firstName";
         }
         if (createCustomerDto.lastName().isEmpty()) {
-            result += " lastName ";
+            result += " lastName";
         }
         if (!EmailValidation.checkMail(createCustomerDto.email())) {
-            result += " email ";
+            result += " email";
         }
         if (createCustomerDto.address().streetName().isEmpty()) {
-            result += " streetName ";
+            result += " streetName";
         }
         if (createCustomerDto.address().houseNumber().isEmpty()) {
-            result += " houseNumber ";
+            result += " houseNumber";
         }
         if (createCustomerDto.address().postalCode().isEmpty()) {
-            result += " postalCode ";
+            result += " postalCode";
         }
         if (createCustomerDto.address().cityName().isEmpty()) {
-            result += " cityName ";
+            result += " cityName";
         }
 
         return result;
