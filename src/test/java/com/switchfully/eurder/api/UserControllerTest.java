@@ -43,7 +43,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createCustomer_whenMissingFields_thenMessageContainsMissingFields()  {
+    void createCustomer_whenEmptyFields_thenMessageContainsEmptyFields()  {
         JSONObject requestBody = new JSONObject();
         requestBody.put("userName", "");
         requestBody.put("password", "pwd");
