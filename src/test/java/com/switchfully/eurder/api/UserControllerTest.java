@@ -7,7 +7,7 @@ import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.domain.security.Role;
 import com.switchfully.eurder.services.mappers.UserMapper;
 import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
+import io.restassured.http.ContentType;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -102,5 +101,14 @@ class UserControllerTest {
         assertTrue(result.contains(userMapper.toDTO(wally)));
         assertTrue(result.contains(userMapper.toDTO(wolf)));
 
+    }
+    @Test
+    void getAllCustomers_whenWrongPassword_thenForbiddenAndMessageUnauthorized(){
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("admin", "pwd123").log().all().contentType(ContentType.JSON)
+                        .when().get("/users")
+                        .then().statusCode(403).and().extract().as(JSONObject.class);
+        assertEquals("Unauthorized", response.get("message").toString());
     }
 }
