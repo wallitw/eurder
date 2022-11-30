@@ -140,8 +140,8 @@ class UserControllerTest {
         JSONObject response =
                 RestAssured
                         .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType(ContentType.JSON)
-                        .when().get("/users/wally")
+                        .when().get("/users/test")
                         .then().statusCode(403).and().extract().as(JSONObject.class);
-        assertEquals("The user: wally is not found", response.get("message").toString());
+        assertEquals("The user: test is not found", response.get("message").toString());
     }
 }
