@@ -4,6 +4,7 @@ import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
 import com.switchfully.eurder.domain.Address;
 import com.switchfully.eurder.domain.Customer;
+import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.domain.security.Role;
@@ -84,5 +85,18 @@ class ItemControllerTest {
                         .when().post("/items")
                         .then().statusCode(403).and().extract().as(JSONObject.class);
         assertEquals("Unauthorized", response.get("message").toString());
+    }
+
+    @Test
+    void createItem_whenItemAlreadyExists_thenBadRequestAndMessageContainsItemName() {
+        itemRepository.createItem(new Item("Laptop HP10", "maakt niet uit wat ik hier zet", 900, 6));
+        CreateItemDto createItemDto = new CreateItemDto("Laptop HP10", "HP 10 15inch i5 core", 1100, 7);
+
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType(ContentType.JSON).body(createItemDto)
+                        .when().post("/items")
+                        .then().statusCode(400).and().extract().as(JSONObject.class);
+        assertEquals("The item you tried to create with name: Laptop HP10 already exists, please use updateItem to change price or amount in stock", response.get("message").toString());
     }
 }

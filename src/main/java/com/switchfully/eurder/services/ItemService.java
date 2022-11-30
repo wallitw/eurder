@@ -31,7 +31,7 @@ public class ItemService {
         if (!error.isEmpty()) throw new IllegalArgumentException("Following fields are invalid:" + error);
         //check if item already exists
         if (checkIfItemAlreadyExists(createItemDto)) {
-            throw new ItemAlreadyExistsException("The item you tried to create with name: " + createItemDto.name() + "already exists, please use updateItem to change price or amount in stock");
+            throw new ItemAlreadyExistsException("The item you tried to create with name: " + createItemDto.name() + " already exists, please use updateItem to change price or amount in stock");
         }
         Item item = new Item(createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amountInStock());
         return itemMapper.toDTO(itemRepository.createItem(item));
