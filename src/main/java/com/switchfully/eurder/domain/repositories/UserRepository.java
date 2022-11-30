@@ -6,6 +6,7 @@ import com.switchfully.eurder.domain.security.Role;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,6 +32,10 @@ public class UserRepository {
         return userMap.values().stream()
                 .filter(user -> user.getUserName().equals(username))
                 .findFirst();
+    }
+
+    public List<User> getAllCustomers() {
+        return userMap.values().stream().toList();
     }
 }
 

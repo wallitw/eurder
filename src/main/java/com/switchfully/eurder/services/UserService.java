@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -81,6 +84,10 @@ public class UserService {
 
         return result;
     }
-
-
+    //UNIQUE USERNAME AND EMAIL STILL NEED TO IMPLEMENT! (zoals bij item)
+    public List<CustomerDto> getAllCustomers() {
+        return userMapper.toDTO(userRepository.getAllCustomers().stream()
+                .filter(user -> user.getRole() == Role.CUSTOMER)
+                .map(user -> (Customer) user ).collect(Collectors.toList()));
+    }
 }

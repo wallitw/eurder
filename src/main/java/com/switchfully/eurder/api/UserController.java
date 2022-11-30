@@ -4,12 +4,14 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.CreateCustomerDto;
 import com.switchfully.eurder.api.dtos.CustomerDto;
+import com.switchfully.eurder.domain.security.Feature;
 import com.switchfully.eurder.services.SecurityService;
 import com.switchfully.eurder.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @RestController
@@ -27,5 +29,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public CustomerDto createCustomer (@RequestBody CreateCustomerDto createCustomerDto) {
         return userService.createCustomer(createCustomerDto);
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<CustomerDto> getAllCustomers (@RequestHeader String authorization) {
+        securityService.validateAuthorisation(authorization, Feature.GET_ALL_CUSTOMERS);
+        return userService.getAllCustomers();
     }
 }
