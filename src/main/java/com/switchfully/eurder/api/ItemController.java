@@ -3,6 +3,7 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.UpdateItemDto;
 import com.switchfully.eurder.domain.security.Feature;
 import com.switchfully.eurder.services.ItemService;
 import com.switchfully.eurder.services.SecurityService;
@@ -26,5 +27,12 @@ public class ItemController {
     public ItemDto createItem(@RequestBody CreateItemDto createItemDto, @RequestHeader String authorization) {
         securityService.validateAuthorisation(authorization, Feature.CREATE_ITEM);
         return itemService.createItem(createItemDto);
+    }
+
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ItemDto updateItem(@RequestBody UpdateItemDto updateItemDto, @RequestHeader String authorization, @PathVariable String id) {
+        securityService.validateAuthorisation(authorization, Feature.UPDATE_ITEM);
+        return itemService.updateItem(updateItemDto, id);
+
     }
 }

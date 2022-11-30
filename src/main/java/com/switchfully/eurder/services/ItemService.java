@@ -3,8 +3,10 @@ package com.switchfully.eurder.services;
 
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.UpdateItemDto;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.exceptions.ItemAlreadyExistsException;
+import com.switchfully.eurder.domain.exceptions.ItemDoesNotExistException;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.services.mappers.ItemMapper;
 import org.slf4j.Logger;
@@ -63,5 +65,22 @@ public class ItemService {
         }
         return itemAlreadyExists;
 
+    }
+
+    public ItemDto updateItem(UpdateItemDto updateItemDto, String id) {
+        Item item = itemRepository.getItemById(id).orElseThrow(() -> new ItemDoesNotExistException("The item you want to update does not exist"));
+        if (!updateItemDto.name().isEmpty()) {
+            item.setName(updateItemDto.name());
+        }
+        if (!updateItemDto.description().isEmpty()) {
+            item.setDescription(updateItemDto.description());
+        }
+        if (updateItemDto.price() > 0) {
+            item.setPrice(updateItemDto.price());
+        }
+        if (updateItemDto.amountInStock() >= 0) {
+            item.setAmountInStock(updateItemDto.amountInStock());
+        }
+        return itemMapper.toDTO(item);
     }
 }

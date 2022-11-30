@@ -53,6 +53,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     protected void emailAlreadyExistsException(EmailAlreadyExistsException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
+
+    @ExceptionHandler(ItemDoesNotExistException.class)
+    protected void itemDoesNotExistException(ItemDoesNotExistException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
 }
 
 

@@ -2,12 +2,14 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.UpdateItemDto;
 import com.switchfully.eurder.domain.Address;
 import com.switchfully.eurder.domain.Customer;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.domain.security.Role;
+import com.switchfully.eurder.services.mappers.ItemMapper;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import net.minidev.json.JSONObject;
@@ -26,6 +28,8 @@ class ItemControllerTest {
     private UserRepository userRepository;
     @Autowired
     private ItemRepository itemRepository;
+    @Autowired
+    private ItemMapper itemMapper;
 
     @Test
     void createItem_whenAdmin_happyPath() {
@@ -98,5 +102,34 @@ class ItemControllerTest {
                         .when().post("/items")
                         .then().statusCode(400).and().extract().as(JSONObject.class);
         assertEquals("The item you tried to create with name: Laptop HP10 already exists, please use updateItem to change price or amount in stock", response.get("message").toString());
+    }
+
+    @Test
+    void updateItemWithAllFields_whenAdmin_happyPath() {
+        Item testItem = new Item("Laptop HP10", "slechte omschrijving ", 100, 6);
+        itemRepository.createItem(testItem);
+        UpdateItemDto updateItemDto = new UpdateItemDto("Updated Laptop HP10", "maakt niet uit wat ik hier zet", 900, 5);
+        ItemDto result =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType("application/json").body(updateItemDto)
+                        .when().put("/items/" + testItem.getId())
+                        .then().statusCode(200).and().extract().as(ItemDto.class);
+        assertEquals("Updated Laptop HP10", result.name());
+        assertEquals("maakt niet uit wat ik hier zet", result.description());
+        assertEquals(900, result.price());
+        assertEquals(5, result.amountInStock());
+    }
+
+    @Test
+    void updateItemWithAllFields_whenAdminAndItemDoesNotExist_thenException() {
+        Item testItem = new Item("Laptop HP10", "slechte omschrijving ", 100, 6);
+        itemRepository.createItem(testItem);
+        UpdateItemDto updateItemDto = new UpdateItemDto("Updated Laptop HP10", "maakt niet uit wat ik hier zet", 900, 5);
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType("application/json").body(updateItemDto)
+                        .when().put("/items/123")
+                        .then().statusCode(400).and().extract().as(JSONObject.class);
+        assertEquals("The item you want to update does not exist", response.get("message").toString());
     }
 }
