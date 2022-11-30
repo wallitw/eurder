@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserControllerTest {
     @LocalServerPort
     int port;
@@ -104,6 +105,48 @@ class UserControllerTest {
                         .then().statusCode(400).and().extract().as(JSONObject.class);
 
         assertEquals("Following fields are invalid: email", response.get("message").toString());
+    }
+
+    @Test
+    void createCustomer_whenUserNameAlreadyExists_thenBadRequestAndCustomMessage() {
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        userRepository.createCustomer(wally);
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("userName", "wally");
+        requestBody.put("password", "pwd");
+        requestBody.put("firstName", "William");
+        requestBody.put("lastName", "Multani");
+        requestBody.put("email", "william.multani@gmail.com");
+        requestBody.put("address", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"));
+        requestBody.put("phoneNumber", "0485300304");
+
+        JSONObject response =
+                RestAssured.given().port(port).contentType("application/json").body(requestBody)
+                        .when().post("/users")
+                        .then().statusCode(400).and().extract().as(JSONObject.class);
+
+        assertEquals("The userName: wally already exists. Please choose another userName", response.get("message").toString());
+    }
+
+    @Test
+    void createCustomer_whenEmailAlreadyExists_thenBadRequestAndCustomMessage() {
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        userRepository.createCustomer(wally);
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("userName", "wally123");
+        requestBody.put("password", "pwd");
+        requestBody.put("firstName", "William");
+        requestBody.put("lastName", "Multani");
+        requestBody.put("email", "william.multani@gmail.com");
+        requestBody.put("address", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"));
+        requestBody.put("phoneNumber", "0485300304");
+
+        JSONObject response =
+                RestAssured.given().port(port).contentType("application/json").body(requestBody)
+                        .when().post("/users")
+                        .then().statusCode(400).and().extract().as(JSONObject.class);
+
+        assertEquals("The email: william.multani@gmail.com is already used. Please provide another email-adress.", response.get("message").toString());
     }
 
     @Test
