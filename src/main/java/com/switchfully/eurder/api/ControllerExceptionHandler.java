@@ -1,5 +1,6 @@
 package com.switchfully.eurder.api;
 
+import com.switchfully.eurder.domain.exceptions.ItemAlreadyExistsException;
 import com.switchfully.eurder.domain.exceptions.UnauthorizedException;
 import com.switchfully.eurder.domain.exceptions.UnknownUserException;
 import com.switchfully.eurder.domain.exceptions.WrongPasswordException;
@@ -35,6 +36,12 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     protected void wrongPasswordException(WrongPasswordException ex, HttpServletResponse response) throws IOException {
 
         response.sendError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(WrongPasswordException.class)
+    protected void itemAlreadyExistsException(ItemAlreadyExistsException ex, HttpServletResponse response) throws IOException {
+
+        response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 }
 
