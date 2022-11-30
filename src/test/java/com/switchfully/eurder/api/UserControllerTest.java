@@ -89,7 +89,7 @@ class UserControllerTest {
 
     @Test
     void getAllCustomers_whenAdmin_happyPath() {
-        Customer wally  =  new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
         Customer wolf = new Customer("wolfgangster", "pwd", Role.CUSTOMER, "Wolf", "Perdieus", "wolf.perdieus@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
         userRepository.createCustomer(wally);
         userRepository.createCustomer(wolf);
@@ -102,13 +102,46 @@ class UserControllerTest {
         assertTrue(result.contains(userMapper.toDTO(wolf)));
 
     }
+
     @Test
-    void getAllCustomers_whenWrongPassword_thenForbiddenAndMessageUnauthorized(){
+    void getAllCustomers_whenWrongPassword_thenForbiddenAndMessageUnauthorized() {
         JSONObject response =
                 RestAssured
                         .given().port(port).auth().preemptive().basic("admin", "pwd123").log().all().contentType(ContentType.JSON)
                         .when().get("/users")
                         .then().statusCode(403).and().extract().as(JSONObject.class);
         assertEquals("Unauthorized", response.get("message").toString());
+    }
+
+    @Test
+    void getCustomerByUsername_whenAdmin_happyPath() {
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        userRepository.createCustomer(wally);
+        CustomerDto result =
+                RestAssured.given().port(port).contentType("application/json").auth().preemptive().basic("admin", "pwd")
+                        .when().get("/users/wally")
+                        .then().statusCode(200).and().extract().as(CustomerDto.class);
+        System.out.println(result);
+        assertEquals(result, userMapper.toDTO(wally));
+    }
+
+    @Test
+    void getCustomerByUsername_whenWrongPassword_thenForbiddenAndMessageUnauthorized() {
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("admin", "pwd123").log().all().contentType(ContentType.JSON)
+                        .when().get("/users/wally")
+                        .then().statusCode(403).and().extract().as(JSONObject.class);
+        assertEquals("Unauthorized", response.get("message").toString());
+    }
+
+    @Test
+    void getCustomerByUsername_whenUserNotExists_thenForbiddenAndMessage() {
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType(ContentType.JSON)
+                        .when().get("/users/wally")
+                        .then().statusCode(403).and().extract().as(JSONObject.class);
+        assertEquals("The user: wally is not found", response.get("message").toString());
     }
 }
