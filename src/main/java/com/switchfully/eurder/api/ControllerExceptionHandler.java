@@ -38,7 +38,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         response.sendError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
     }
 
-    @ExceptionHandler(WrongPasswordException.class)
+    @ExceptionHandler(ItemAlreadyExistsException.class)
     protected void itemAlreadyExistsException(ItemAlreadyExistsException ex, HttpServletResponse response) throws IOException {
 
         response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
