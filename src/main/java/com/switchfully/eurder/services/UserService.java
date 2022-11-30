@@ -4,7 +4,9 @@ import com.switchfully.eurder.api.dtos.CreateCustomerDto;
 import com.switchfully.eurder.api.dtos.CreateUserDto;
 import com.switchfully.eurder.api.dtos.CustomerDto;
 import com.switchfully.eurder.domain.Customer;
+import com.switchfully.eurder.domain.exceptions.EmailAlreadyExistsException;
 import com.switchfully.eurder.domain.exceptions.UnknownUserException;
+import com.switchfully.eurder.domain.exceptions.UserNameAlreadyExistsException;
 import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.domain.security.EmailValidation;
 import com.switchfully.eurder.domain.security.Role;
@@ -35,6 +37,13 @@ public class UserService {
         if (!error.isEmpty()) {
             logger.info("A user tried to create an account but entered invalid fields: " + error);
             throw new IllegalArgumentException("Following fields are invalid:" + error);
+        }
+
+        if (checkIfUsernameAlreadyExists(createCustomerDto)) {
+            throw new UserNameAlreadyExistsException("The userName: " + createCustomerDto.userName() + " already exists. Please choose another userName");
+        }
+        if (checkIfEmailAlreadyExists(createCustomerDto)) {
+            throw new EmailAlreadyExistsException("The email: " + createCustomerDto.email()+ " is already used. Please provide another email-adress.");
         }
 
         Customer customer = new Customer(createCustomerDto.userName(),
@@ -89,7 +98,21 @@ public class UserService {
         return result;
     }
 
-    //UNIQUE USERNAME AND EMAIL STILL NEED TO IMPLEMENT! (zoals bij item)
+    public boolean checkIfUsernameAlreadyExists(CreateCustomerDto createCustomerDto) {
+        return userRepository.getUserByUserName(createCustomerDto.userName()).isPresent();
+    }
+
+    public boolean checkIfEmailAlreadyExists(CreateCustomerDto createCustomerDto) {
+       boolean emailAlreadyExists = true;
+        List<CustomerDto> customerFilter = getAllCustomers().stream()
+                .filter(customer -> customer.email().equals(createCustomerDto.email())).toList();
+        if (customerFilter.isEmpty()) {
+            emailAlreadyExists = false;
+        }
+        return emailAlreadyExists;
+    }
+
+
     public List<CustomerDto> getAllCustomers() {
         return userMapper.toDTO(userRepository.getAllCustomers().stream()
                 .filter(user -> user.getRole() == Role.CUSTOMER)
