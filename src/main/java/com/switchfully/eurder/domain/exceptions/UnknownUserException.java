@@ -4,4 +4,8 @@ public class UnknownUserException extends RuntimeException {
     public UnknownUserException() {
         super("Unauthorized");
     }
+
+    public UnknownUserException(String message) {
+        super(message);
+    }
 }

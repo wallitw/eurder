@@ -4,6 +4,7 @@ import com.switchfully.eurder.api.dtos.CreateCustomerDto;
 import com.switchfully.eurder.api.dtos.CreateUserDto;
 import com.switchfully.eurder.api.dtos.CustomerDto;
 import com.switchfully.eurder.domain.Customer;
+import com.switchfully.eurder.domain.exceptions.UnknownUserException;
 import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.domain.security.EmailValidation;
 import com.switchfully.eurder.domain.security.Role;
@@ -84,10 +85,16 @@ public class UserService {
 
         return result;
     }
+
     //UNIQUE USERNAME AND EMAIL STILL NEED TO IMPLEMENT! (zoals bij item)
     public List<CustomerDto> getAllCustomers() {
         return userMapper.toDTO(userRepository.getAllCustomers().stream()
                 .filter(user -> user.getRole() == Role.CUSTOMER)
-                .map(user -> (Customer) user ).collect(Collectors.toList()));
+                .map(user -> (Customer) user).collect(Collectors.toList()));
+    }
+
+    public CustomerDto getCustomerByUsername(String username) {
+        return userMapper.toDTO((Customer) userRepository.getUserByUserName(username)
+                .orElseThrow(() -> new UnknownUserException("The user: " + username + " is not found")));
     }
 }

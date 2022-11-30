@@ -36,4 +36,12 @@ public class UserController {
         securityService.validateAuthorisation(authorization, Feature.GET_ALL_CUSTOMERS);
         return userService.getAllCustomers();
     }
+
+    @GetMapping(path = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public CustomerDto getCustomerByUsername (@PathVariable String username, @RequestHeader String authorization) {
+        securityService.validateAuthorisation(authorization, Feature.GET_CUSTOMER_BY_ID);
+        return userService.getCustomerByUsername(username);
+    }
+
+
 }
