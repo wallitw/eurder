@@ -82,6 +82,9 @@ public class UserService {
         if (createCustomerDto.address().cityName().isEmpty()) {
             result += " cityName";
         }
+        if (createCustomerDto.phoneNumber().isEmpty()) {
+            result += " phoneNumber";
+        }
 
         return result;
     }

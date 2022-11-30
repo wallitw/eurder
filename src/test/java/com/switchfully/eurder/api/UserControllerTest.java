@@ -69,6 +69,25 @@ class UserControllerTest {
     }
 
     @Test
+    void createCustomer_whenAllEmptyFields_thenMessageContainsAllEmptyFields() {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("userName", "");
+        requestBody.put("password", "");
+        requestBody.put("firstName", "");
+        requestBody.put("lastName", "");
+        requestBody.put("email", "");
+        requestBody.put("address", new Address("", "", "", ""));
+        requestBody.put("phoneNumber", "");
+
+        JSONObject response =
+                RestAssured.given().port(port).contentType("application/json").body(requestBody)
+                        .when().post("/users")
+                        .then().statusCode(400).and().extract().as(JSONObject.class);
+
+        assertEquals("Following fields are invalid: userName password firstName lastName email streetName houseNumber postalCode cityName phoneNumber", new JSONObject(response).get("message").toString());
+    }
+
+    @Test
     void createCustomer_whenEmailWrongFormat_thenMessageContainsEmail() {
         JSONObject requestBody = new JSONObject();
         requestBody.put("userName", "wally");
