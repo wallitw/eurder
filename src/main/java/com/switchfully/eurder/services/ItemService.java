@@ -13,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class ItemService {
 
@@ -57,14 +55,7 @@ public class ItemService {
     }
 
     private boolean checkIfItemAlreadyExists(CreateItemDto createItemDto) {
-        boolean itemAlreadyExists = true;
-        List<Item> itemFilter = itemRepository.getAllItems().stream()
-                .filter(item -> item.getName().equals(createItemDto.name())).toList();
-        if (itemFilter.isEmpty()) {
-            itemAlreadyExists = false;
-        }
-        return itemAlreadyExists;
-
+        return itemRepository.getItemByName(createItemDto.name()).isPresent();
     }
 
     public ItemDto updateItem(UpdateItemDto updateItemDto, String id) {
