@@ -24,10 +24,6 @@ public class UserRepository {
         return customer;
     }
 
-    public Optional<User> getUserById(String userId) {
-        return Optional.ofNullable(userMap.get(userId));
-    }
-
     public Optional<User> getUserByUserName(String username) {
         return userMap.values().stream()
                 .filter(user -> user.getUserName().equals(username))

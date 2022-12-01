@@ -26,9 +26,6 @@ public class User {
         return userName;
     }
 
-    public String getPassword() {
-        return password;
-    }
 
     public Role getRole() {
         return role;

@@ -8,7 +8,6 @@ import com.switchfully.eurder.domain.Customer;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.ItemGroup;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
-import com.switchfully.eurder.domain.repositories.OrderRepository;
 import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.domain.security.Role;
 import com.switchfully.eurder.services.mappers.UserMapper;
@@ -76,6 +75,23 @@ public class OrderControllerTest {
         assertEquals(userMapper.toDTO(wally), result.customer());
         assertEquals(LocalDate.now().plusDays(7), result.itemGroupList().get(0).getShippingDate());
         assertEquals(testItem.getItemId(), result.itemGroupList().get(0).getItemId());
+    }
+
+    @Test
+    void orderItem_whenCustomerWrongPassword_Forbidden() {
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        userRepository.createCustomer(wally);
+        Item testItem = new Item("Laptop HP10", "i5 Processor", 1000, 2);
+        itemRepository.createItem(testItem);
+        List<ItemGroup> itemsToOrder = new ArrayList<>();
+        itemsToOrder.add(new ItemGroup(testItem.getItemId(), 15));
+        CreateOrderDto createOrderDto = new CreateOrderDto(itemsToOrder);
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("wally", "pwd12").log().all().contentType("application/json").body(createOrderDto)
+                        .when().post("/orders")
+                        .then().statusCode(403).and().extract().as(JSONObject.class);
+        assertEquals("Unauthorized", response.get("message").toString());
     }
 
     @Test
