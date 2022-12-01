@@ -58,6 +58,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     protected void itemDoesNotExistException(ItemDoesNotExistException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
+
+
 }
 
 

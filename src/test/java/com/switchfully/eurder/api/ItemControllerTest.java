@@ -112,7 +112,7 @@ class ItemControllerTest {
         ItemDto result =
                 RestAssured
                         .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType("application/json").body(updateItemDto)
-                        .when().put("/items/" + testItem.getId())
+                        .when().put("/items/" + testItem.getItemId())
                         .then().statusCode(200).and().extract().as(ItemDto.class);
         assertEquals("Updated Laptop HP10", result.name());
         assertEquals("maakt niet uit wat ik hier zet", result.description());

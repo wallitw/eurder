@@ -29,7 +29,7 @@ public class ItemRepository {
 
     public Optional<Item> getItemById(String id) {
         return getAllItems().stream()
-                .filter(item -> item.getId().equals(id))
+                .filter(item -> item.getItemId().equals(id))
                 .findFirst();
     }
 }
