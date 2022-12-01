@@ -95,6 +95,21 @@ public class OrderControllerTest {
     }
 
     @Test
+    void orderItem_whenNoAuthorization_Forbidden() {
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        userRepository.createCustomer(wally);
+        Item testItem = new Item("Laptop HP10", "i5 Processor", 1000, 2);
+        itemRepository.createItem(testItem);
+        List<ItemGroup> itemsToOrder = new ArrayList<>();
+        itemsToOrder.add(new ItemGroup(testItem.getItemId(), 15));
+        CreateOrderDto createOrderDto = new CreateOrderDto(itemsToOrder);
+                RestAssured
+                        .given().port(port).contentType("application/json").body(createOrderDto)
+                        .when().post("/orders")
+                        .then().statusCode(400);
+    }
+
+    @Test
     void orderItem_whenCustomerAndItemDoesNotExist_thenBadRequestAndCustomMessage() {
         Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
         userRepository.createCustomer(wally);
