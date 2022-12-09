@@ -158,5 +158,22 @@ class ItemControllerTest {
         assertEquals(StockLevel.STOCK_LOW, stockitems.get(0).stockLevel());
     }
 
+    @Test
+    void viewItemOverviewWithParams_whenAdminThenStockItemsHaveStockLevelAndAreOrdered_happyPath() {
+        Item testItem = new Item("Laptop HP10", "slechte omschrijving ", 100, 6);
+        Item testItem2 = new Item("Mouse", "slechte omschrijving ", 100, 11);
+        Item testItem3 = new Item("Screen", "slechte omschrijving ", 10, 0);
+
+        itemRepository.createItem(testItem);
+        itemRepository.createItem(testItem2);
+        itemRepository.createItem(testItem3);
+        List<StockItemDto> stockitems =
+                RestAssured.given().port(port).contentType("application/json").auth().preemptive().basic("admin", "pwd")
+                        .when().get("/items/stock?stocklevel=stock_low")
+                        .then().statusCode(200).and().extract().body().jsonPath().getList(".", StockItemDto.class);
+
+        assertEquals(StockLevel.STOCK_LOW, stockitems.get(0).stockLevel());
+    }
+
 
 }
