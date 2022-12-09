@@ -148,4 +148,30 @@ public class OrderControllerTest {
 
         assertEquals(2*1000, result.totalPriceOfAllOrders());
     }
+
+    @Test
+    void viewOrderReport_whenWrongCustomer_thenForbidden() {
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        Customer wolf = new Customer("wolf", "pwd", Role.CUSTOMER, "Wolf", "Perdieus", "wolf.perdieus@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485345304");
+        userRepository.createCustomer(wally);
+        userRepository.createCustomer(wolf);
+        Item testItem = new Item("Laptop HP10", "i5 Processor", 1000, 2);
+        itemRepository.createItem(testItem);
+        List<ItemGroup> itemsToOrder = new ArrayList<>();
+        itemsToOrder.add(new ItemGroup(testItem.getItemId(), 2));
+        CreateOrderDto createOrderDto = new CreateOrderDto(itemsToOrder);
+        OrderDto order =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("wally", "pwd").log().all().contentType("application/json").body(createOrderDto)
+                        .when().post("/orders")
+                        .then().statusCode(201).and().extract().as(OrderDto.class);
+
+        JSONObject response =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("wolf", "pwd").log().all().contentType("application/json")
+                        .when().get("/orders/wally")
+                        .then().statusCode(403).extract().as(JSONObject.class);
+
+        assertEquals("Unauthorized", response.get("message").toString());
+    }
 }
