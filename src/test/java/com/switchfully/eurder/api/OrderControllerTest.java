@@ -3,6 +3,7 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.CreateOrderDto;
 import com.switchfully.eurder.api.dtos.OrderDto;
+import com.switchfully.eurder.api.dtos.OrderReportDto;
 import com.switchfully.eurder.domain.Address;
 import com.switchfully.eurder.domain.Customer;
 import com.switchfully.eurder.domain.Item;
@@ -122,6 +123,29 @@ public class OrderControllerTest {
                         .when().post("/orders")
                         .then().statusCode(400).and().extract().as(JSONObject.class);
         assertEquals("The item you tried to order does not exist. The order is cancelled.", response.get("message").toString());
+    }
 
+    @Test
+    void viewOrderReport_whenCustomer_happyPath() {
+        Customer wally = new Customer("wally", "pwd", Role.CUSTOMER, "William", "Multani", "william.multani@gmail.com", new Address("Paul Lebrunstraat", "9", "3000", "Leuven"), "0485300304");
+        userRepository.createCustomer(wally);
+        Item testItem = new Item("Laptop HP10", "i5 Processor", 1000, 2);
+        itemRepository.createItem(testItem);
+        List<ItemGroup> itemsToOrder = new ArrayList<>();
+        itemsToOrder.add(new ItemGroup(testItem.getItemId(), 2));
+        CreateOrderDto createOrderDto = new CreateOrderDto(itemsToOrder);
+        OrderDto order =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("wally", "pwd").log().all().contentType("application/json").body(createOrderDto)
+                        .when().post("/orders")
+                        .then().statusCode(201).and().extract().as(OrderDto.class);
+
+        OrderReportDto result =
+                RestAssured
+                        .given().port(port).auth().preemptive().basic("wally", "pwd").log().all().contentType("application/json")
+                        .when().get("/orders/wally")
+                        .then().statusCode(200).and().extract().as(OrderReportDto.class);
+
+        assertEquals(2*1000, result.totalPriceOfAllOrders());
     }
 }
