@@ -7,7 +7,6 @@ public class ItemGroup {
     private final int amount;
     private LocalDate shippingDate;
 
-    private double priceAtMoment;
 
     public ItemGroup(String itemId, int amount) {
         this.itemId = itemId;
@@ -31,7 +30,12 @@ public class ItemGroup {
         this.shippingDate = shippingDate;
     }
 
-    public void setPriceAtMoment(double priceAtMoment) {
-        this.priceAtMoment = priceAtMoment;
+    @Override
+    public String toString() {
+        return "ItemGroup{" +
+                "itemId='" + itemId + '\'' +
+                ", amount=" + amount +
+                ", shippingDate=" + shippingDate +
+                '}';
     }
 }

@@ -3,6 +3,7 @@ package com.switchfully.eurder.services;
 
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.StockItemDto;
 import com.switchfully.eurder.api.dtos.UpdateItemDto;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.exceptions.ItemAlreadyExistsException;
@@ -12,6 +13,10 @@ import com.switchfully.eurder.services.mappers.ItemMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemService {
@@ -31,7 +36,7 @@ public class ItemService {
         if (!error.isEmpty()) throw new IllegalArgumentException("Following fields are invalid:" + error);
         //check if item already exists
         if (checkIfItemAlreadyExists(createItemDto)) {
-            throw new ItemAlreadyExistsException("The item you tried to create with name: " + createItemDto.name() + " already exists, please use updateItem to change price or amount in stock");
+            throw new ItemAlreadyExistsException("The item you tried to create with name: " + createItemDto.name() + " already exists, please use updateItem with following id: " + itemRepository.getItemByName(createItemDto.name()).orElseThrow().getItemId() + " to change price or amount in stock");
         }
         Item item = new Item(createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amountInStock());
         return itemMapper.toDTO(itemRepository.createItem(item));
@@ -73,5 +78,20 @@ public class ItemService {
             item.setAmountInStock(updateItemDto.amountInStock());
         }
         return itemMapper.toDTO(item);
+    }
+
+    public List<ItemDto> getAllItems() {
+        return itemMapper.toDTO(itemRepository.getAllItems());
+    }
+
+    public List<StockItemDto> getAllItemsStockLevel() {
+        for (Item item : itemRepository.getAllItems()) {
+            item.setStockLevel();
+        }
+        return itemMapper.toStockItemDto(itemRepository.getAllItems().stream().sorted(Comparator.comparing((Item::getAmountInStock))).collect(Collectors.toList()));
+    }
+
+    public List<StockItemDto> getItemsOfStockLevel(String stocklevel) {
+        return getAllItemsStockLevel().stream().filter(stockItemDto -> stockItemDto.stockLevel().toString().equalsIgnoreCase(stocklevel)).collect(Collectors.toList());
     }
 }

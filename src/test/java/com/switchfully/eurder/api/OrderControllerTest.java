@@ -53,8 +53,8 @@ public class OrderControllerTest {
                         .then().statusCode(201).and().extract().as(OrderDto.class);
 
         assertEquals(userMapper.toDTO(wally), result.customer());
-        assertEquals(LocalDate.now().plusDays(1), result.itemGroupList().get(0).getShippingDate());
-        assertEquals(testItem.getItemId(), result.itemGroupList().get(0).getItemId());
+        assertEquals(LocalDate.now().plusDays(1), result.itemGroupDtoList().get(0).shippingDate());
+        assertEquals(testItem.getItemId(), result.itemGroupDtoList().get(0).itemId());
     }
 
     @Test
@@ -73,8 +73,8 @@ public class OrderControllerTest {
                         .then().statusCode(201).and().extract().as(OrderDto.class);
 
         assertEquals(userMapper.toDTO(wally), result.customer());
-        assertEquals(LocalDate.now().plusDays(7), result.itemGroupList().get(0).getShippingDate());
-        assertEquals(testItem.getItemId(), result.itemGroupList().get(0).getItemId());
+        assertEquals(LocalDate.now().plusDays(7), result.itemGroupDtoList().get(0).shippingDate());
+        assertEquals(testItem.getItemId(), result.itemGroupDtoList().get(0).itemId());
     }
 
     @Test

@@ -36,18 +36,12 @@ public class SecurityService {
             logger.info("This user doesn't have the correct role or access to features");
             throw new UnauthorizedException();
         }
-
     }
 
     private UsernamePassword getUsernamePassword(String authorization) throws UnauthorizedException {
-        try {
-            String decodedToUsernameAndPassword = new String(Base64.getDecoder().decode(authorization.substring("Basic ".length())));
-            String username = decodedToUsernameAndPassword.split(":")[0];
-            String password = decodedToUsernameAndPassword.split(":")[1];
-            return new UsernamePassword(username, password);
-        } catch (RuntimeException ex) {
-            logger.info("Missing authorization value in header.");
-            throw new UnauthorizedException();
-        }
+        String decodedToUsernameAndPassword = new String(Base64.getDecoder().decode(authorization.substring("Basic ".length())));
+        String username = decodedToUsernameAndPassword.split(":")[0];
+        String password = decodedToUsernameAndPassword.split(":")[1];
+        return new UsernamePassword(username, password);
     }
 }

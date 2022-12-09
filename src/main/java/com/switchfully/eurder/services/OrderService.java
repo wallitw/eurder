@@ -3,11 +3,13 @@ package com.switchfully.eurder.services;
 import com.switchfully.eurder.api.dtos.CreateOrderDto;
 import com.switchfully.eurder.api.dtos.CustomerDto;
 import com.switchfully.eurder.api.dtos.OrderDto;
+import com.switchfully.eurder.api.dtos.OrderReportDto;
 import com.switchfully.eurder.domain.Customer;
 import com.switchfully.eurder.domain.ItemGroup;
 import com.switchfully.eurder.domain.Order;
 import com.switchfully.eurder.domain.User;
 import com.switchfully.eurder.domain.exceptions.ItemDoesNotExistException;
+import com.switchfully.eurder.domain.exceptions.UnauthorizedException;
 import com.switchfully.eurder.domain.exceptions.UnknownUserException;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.OrderRepository;
@@ -42,27 +44,23 @@ public class OrderService {
 
     public OrderDto createOrder(CreateOrderDto createOrderDto, String authorization) {
         CustomerDto customer = userMapper.toDTO((Customer) getCustomerByAuthorization(authorization));
-
         //Stock validation
         validateStock(createOrderDto.itemGroupList());
-        setPrice(createOrderDto.itemGroupList());
         Order order = new Order(calculateTotalPrice(createOrderDto.itemGroupList()), createOrderDto.itemGroupList(), customer);
         return orderMapper.toDTO(orderRepository.createOrder(order));
-    }
-    private void setPrice(List<ItemGroup> itemGroupList) {
-        for (ItemGroup itemGroup : itemGroupList) {
-            itemGroup.setPriceAtMoment(itemRepository.getItemById(itemGroup.getItemId()).orElseThrow().getPrice());
-            }
     }
 
     private void validateStock(List<ItemGroup> itemGroupList) {
         for (ItemGroup itemGroup : itemGroupList) {
-            if (itemGroup.getAmount() > itemRepository.getItemById(itemGroup.getItemId()).orElseThrow(() -> new ItemDoesNotExistException("The item you tried to order does not exist. The order is cancelled.")).getAmountInStock()) {
+            System.out.println(itemGroup.toString());
+            System.out.println(itemGroup.getItemId());
+            int currentAmountInStock = itemRepository.getItemById(itemGroup.getItemId()).orElseThrow(() -> new ItemDoesNotExistException("The item you tried to order does not exist. The order is cancelled.")).getAmountInStock();
+            if (itemGroup.getAmount() > currentAmountInStock) {
                 itemGroup.setShippingDate(LocalDate.now().plusDays(7));
-            }
-            else {
+            } else {
                 itemGroup.setShippingDate(LocalDate.now().plusDays(1));
             }
+            itemRepository.getItemById(itemGroup.getItemId()).orElseThrow(() -> new ItemDoesNotExistException("The item you tried to order does not exist. The order is cancelled.")).setAmountInStock(currentAmountInStock - itemGroup.getAmount());
         }
     }
 
@@ -74,9 +72,20 @@ public class OrderService {
         return totalPrice;
     }
 
-    private User getCustomerByAuthorization(String authorization){
+    private User getCustomerByAuthorization(String authorization) {
         String decodedToUsernameAndPassword = new String(Base64.getDecoder().decode(authorization.substring("Basic ".length())));
         String userName = decodedToUsernameAndPassword.split(":")[0];
         return userRepository.getUserByUserName(userName).orElseThrow(() -> new UnknownUserException("User not found"));
+    }
+
+    public OrderReportDto getCustomerOrders(String authorization, String userName) {
+        CustomerDto customer = userMapper.toDTO((Customer) getCustomerByAuthorization(authorization));
+        if (!customer.userName().equals(userName)) {
+            throw new UnauthorizedException();
+        }
+        List<OrderDto> listOfCustomerOrders = orderMapper.toDTO(orderRepository.getCustomerOrders(customer));
+        double totalPriceOfAllOrders = listOfCustomerOrders.stream().mapToDouble(orderDto -> orderDto.totalPrice()).sum();
+
+         return new OrderReportDto(totalPriceOfAllOrders, listOfCustomerOrders);
     }
 }

@@ -10,6 +10,8 @@ public class Item {
     private double price;
     private int amountInStock;
 
+    private StockLevel stockLevel;
+
     public Item(String name, String description, double price, int amountInStock) {
         this.itemId = UUID.randomUUID().toString();
         this.name = name;
@@ -51,5 +53,21 @@ public class Item {
 
     public void setAmountInStock(int amountInStock) {
         this.amountInStock = amountInStock;
+    }
+
+    public void setStockLevel() {
+        if (this.amountInStock < 5) {
+            this.stockLevel = StockLevel.STOCK_LOW;
+        }
+        else if (this.amountInStock < 10) {
+            this.stockLevel = StockLevel.STOCK_MEDIUM;
+        }
+        else {
+            this.stockLevel = StockLevel.STOCK_HIGH;
+        }
+    }
+
+    public StockLevel getStockLevel() {
+        return stockLevel;
     }
 }

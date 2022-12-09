@@ -17,10 +17,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ItemControllerTest {
     @LocalServerPort
     int port;
@@ -42,6 +44,7 @@ class ItemControllerTest {
                         .then().statusCode(201).and().extract().as(ItemDto.class);
         assertEquals("Laptop", result.name());
     }
+
     @Test
     void createItem_whenAdminAndEmptyFields_thenMessageContainsInvalidFields() {
         CreateItemDto createItemDto = new CreateItemDto("", "", -7, -1);
@@ -93,7 +96,8 @@ class ItemControllerTest {
 
     @Test
     void createItem_whenItemAlreadyExists_thenBadRequestAndMessageContainsItemName() {
-        itemRepository.createItem(new Item("Laptop HP10", "maakt niet uit wat ik hier zet", 900, 6));
+        Item testItem = new Item("Laptop HP10", "maakt niet uit wat ik hier zet", 900, 6);
+        itemRepository.createItem(testItem);
         CreateItemDto createItemDto = new CreateItemDto("Laptop HP10", "HP 10 15inch i5 core", 1100, 7);
 
         JSONObject response =
@@ -101,7 +105,7 @@ class ItemControllerTest {
                         .given().port(port).auth().preemptive().basic("admin", "pwd").log().all().contentType(ContentType.JSON).body(createItemDto)
                         .when().post("/items")
                         .then().statusCode(400).and().extract().as(JSONObject.class);
-        assertEquals("The item you tried to create with name: Laptop HP10 already exists, please use updateItem to change price or amount in stock", response.get("message").toString());
+        assertEquals("The item you tried to create with name: Laptop HP10 already exists, please use updateItem with following id: " + testItem.getItemId() + " to change price or amount in stock", response.get("message").toString());
     }
 
     @Test
