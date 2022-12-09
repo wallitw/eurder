@@ -1,11 +1,10 @@
 package com.switchfully.eurder.api;
 
-import com.switchfully.eurder.api.dtos.CreateItemDto;
-import com.switchfully.eurder.api.dtos.ItemDto;
-import com.switchfully.eurder.api.dtos.UpdateItemDto;
+import com.switchfully.eurder.api.dtos.*;
 import com.switchfully.eurder.domain.Address;
 import com.switchfully.eurder.domain.Customer;
 import com.switchfully.eurder.domain.Item;
+import com.switchfully.eurder.domain.StockLevel;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.domain.security.Role;
@@ -19,7 +18,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -136,4 +138,25 @@ class ItemControllerTest {
                         .then().statusCode(400).and().extract().as(JSONObject.class);
         assertEquals("The item you want to update does not exist", response.get("message").toString());
     }
+
+    @Test
+    void viewItemOverviewNoParams_whenAdminThenStockItemsHaveStockLevelAndAreOrdered_happyPath() {
+        Item testItem = new Item("Laptop HP10", "slechte omschrijving ", 100, 6);
+        Item testItem2 = new Item("Mouse", "slechte omschrijving ", 100, 11);
+        Item testItem3 = new Item("Screen", "slechte omschrijving ", 10, 0);
+
+        itemRepository.createItem(testItem);
+        itemRepository.createItem(testItem2);
+        itemRepository.createItem(testItem3);
+        List<StockItemDto> stockitems =
+                RestAssured.given().port(port).contentType("application/json").auth().preemptive().basic("admin", "pwd")
+                        .when().get("/items/stock")
+                        .then().statusCode(200).and().extract().body().jsonPath().getList(".", StockItemDto.class);
+
+        assertEquals(StockLevel.STOCK_HIGH, stockitems.get(2).stockLevel());
+        assertEquals(StockLevel.STOCK_MEDIUM, stockitems.get(1).stockLevel());
+        assertEquals(StockLevel.STOCK_LOW, stockitems.get(0).stockLevel());
+    }
+
+
 }
